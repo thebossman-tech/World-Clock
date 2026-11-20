@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Clock</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #08111f, #101e35, #182944);
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        /* HEADER */
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 42px;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        header h1 span {
+            color: #38bdf8;
+        }
+
+        header p {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        /* SEARCH AND ADD CITY */
+
+        .city-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+        }
+
+        .city-controls select {
+            padding: 15px;
+            width: 280px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            background: #17263d;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .city-controls button {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            background: #38bdf8;
+            color: #08111f;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .city-controls button:hover {
+            background: #0ea5e9;
+            transform: translateY(-2px);
+        }
+
+        /* CLOCK GRID */
+
+        .clock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 22px;
+        }
+
+        /* CLOCK CARD */
+
+        .clock-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 22px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .clock-card:hover {
+            transform: translateY(-7px);
+            border-color: #38bdf8;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .clock-card::before {
+            content: "";
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            background: rgba(56, 189, 248, 0.08);
+            border-radius: 50%;
+            right: -40px;
+            top: -40px;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .city-info h2 {
+            font-size: 21px;
+            margin-bottom: 6px;
+        }
+
+        .city-info p {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            padding: 7px 11px;
+            border-radius: 30px;
+            font-size: 12px;
+        }
+
+        .time {
+            font-size: 42px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+        }
+
+        .day-status {
+            color: #cbd5e1;
+            font-size: 13px;
+        }
+
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: #f87171;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .remove-btn:hover {
+            color: #ef4444;
+        }
+
+        /* EMPTY MESSAGE */
+
+        .empty-message {
+            text-align: center;
+            color: #94a3b8;
+            margin-top: 50px;
+            font-size: 18px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 600px) {
+
+            header h1 {
+                font-size: 30px;
+            }
+
+            .time {
+                font-size: 36px;
+            }
+
+            .clock-card {
+                padding: 22px;
+            }
+
+            .city-controls select {
+                width: 100%;
+            }
+
+            .city-controls button {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>🌍 World <span>Clock</span></h1>
+            <p>Time connects us all. Explore the world, one clock at a time.</p>
+        </header>
+
+        <!-- ADD CITY SECTION -->
+
+        <div class="city-controls">
+
+            <select id="citySelect">
+                <option value="">Choose a city...</option>
+
+                <option value="Africa/Lagos">Lagos, Nigeria</option>
+                <option value="Europe/London">London, United Kingdom</option>
+                <option value="America/New_York">New York, USA</option>
+                <option value="America/Los_Angeles">Los Angeles, USA</option>
+                <option value="Asia/Dubai">Dubai, UAE</option>
+                <option value="Asia/Tokyo">Tokyo, Japan</option>
+                <option value="Asia/Singapore">Singapore</option>
+                <option value="Asia/Kolkata">Mumbai, India</option>
+                <option value="Australia/Sydney">Sydney, Australia</option>
+                <option value="Europe/Paris">Paris, France</option>
+                <option value="Europe/Berlin">Berlin, Germany</option>
+                <option value="Africa/Cairo">Cairo, Egypt</option>
+                <option value="Africa/Nairobi">Nairobi, Kenya</option>
+                <option value="America/Toronto">Toronto, Canada</option>
+                <option value="America/Sao_Paulo">São Paulo, Brazil</option>
+
+            </select>
+
+            <button onclick="addCity()">+ Add City</button>
+
+        </div>
+
+        <!-- CLOCKS -->
+
+        <div class="clock-grid" id="clockGrid"></div>
+
+        <footer>
+            World Clock Dashboard &nbsp; | &nbsp; Powered by JavaScript
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        // DEFAULT CITIES
+
+        let cities = [
+
+            {
+                name: "Lagos",
+                country: "Nigeria",
+                timezone: "Africa/Lagos"
+            },
+
+            {
+                name: "London",
+                country: "United Kingdom",
+                timezone: "Europe/London"
+            },
+
+            {
+                name: "New York",
+                country: "United States",
+                timezone: "America/New_York"
+            },
+
+            {
+                name: "Dubai",
+                country: "United Arab Emirates",
+                timezone: "Asia/Dubai"
+            },
+
+            {
+                name: "Tokyo",
+                country: "Japan",
+                timezone: "Asia/Tokyo"
+            }
+
+        ];
+
+
+        // FUNCTION TO DISPLAY CLOCKS
+
+        function displayClocks() {
+
+            const clockGrid = document.getElementById("clockGrid");
+
+            clockGrid.innerHTML = "";
+
+            cities.forEach(function(city, index) {
+
+                let now = new Date();
+
+                // Get time for the city
+
+                let time = now.toLocaleTimeString("en-US", {
+
+                    timeZone: city.timezone,
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true
+
+                });
+
+                // Get date for the city
+
+                let date = now.toLocaleDateString("en-US", {
+
+                    timeZone: city.timezone,
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+
+                });
+
+                // Get hour to determine day or night
+
+                let hour = Number(
+
+                    now.toLocaleString("en-US", {
+
+                        timeZone: city.timezone,
+                        hour: "numeric",
+                        hour12: false
+
+                    })
+
+                );
+
+                let isDay = hour >= 6 && hour < 18;
+
+                let status = isDay ? "☀️ Daytime" : "🌙 Nighttime";
+
+                // CREATE CARD
+
+                let card = document.createElement("div");
+
+                card.className = "clock-card";
+
+                card.innerHTML = `
+
+                    <div class="card-top">
+
+                        <div class="city-info">
+
+                            <h2>${city.name}</h2>
+
+                            <p>${city.country}</p>
+
+                        </div>
+
+                        <span class="badge">
+
+                            ${isDay ? "☀️ DAY" : "🌙 NIGHT"}
+
+                        </span>
+
+                    </div>
+
+                    <div class="time">
+
+                        ${time}
+
+                    </div>
+
+                    <div class="date">
+
+                        ${date}
+
+                    </div>
+
+                    <div class="card-bottom">
+
+                        <span class="day-status">
+
+                            ${status}
+
+                        </span>
+
+                        <button class="remove-btn" onclick="removeCity(${index})">
+
+                            ✕ Remove
+
+                        </button>
+
+                    </div>
+
+                `;
+
+                clockGrid.appendChild(card);
+
+            });
+
+        }
+
+
+        // FUNCTION TO ADD CITY
+
+        function addCity() {
+
+            let select = document.getElementById("citySelect");
+
+            let timezone = select.value;
+
+            if (timezone === "") {
+
+                alert("Please select a city first!");
+
+                return;
+
+            }
+
+            // Check if city already exists
+
+            let exists = cities.some(function(city) {
+
+                return city.timezone === timezone;
+
+            });
+
+            if (exists) {
+
+                alert("This city is already on your clock!");
+
+                return;
+
+            }
+
+            // Get city name from dropdown
+
+            let cityName = select.options[select.selectedIndex].text;
+
+            let parts = cityName.split(",");
+
+            let name = parts[0].trim();
+
+            let country = parts[1] ? parts[1].trim() : "";
+
+            // Add city to array
+
+            cities.push({
+
+                name: name,
+
+                country: country,
+
+                timezone: timezone
+
+            });
+
+            displayClocks();
+
+            select.value = "";
+
+        }
+
+
+        // FUNCTION TO REMOVE CITY
+
+        function removeCity(index) {
+
+            cities.splice(index, 1);
+
+            displayClocks();
+
+        }
+
+
+        // UPDATE CLOCK EVERY SECOND
+
+        displayClocks();
+
+        setInterval(displayClocks, 1000);
+
+    </script>
+
+</body>
+</html>
